@@ -1,15 +1,16 @@
 package usecase
 
 import (
+	"context"
+	"net/http"
+	"time"
+
 	_model "bitbucket.org/edts/go-task-management/internal/model"
 	_genModel "bitbucket.org/edts/go-task-management/internal/model/_generated"
 	_repo "bitbucket.org/edts/go-task-management/internal/repository"
 	_customErr "bitbucket.org/edts/go-task-management/pkg/errors"
-	"context"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 	"golang.org/x/crypto/bcrypt"
-	"net/http"
-	"time"
 )
 
 type AuthUsecaseInterface interface {
@@ -89,26 +90,15 @@ func (uc *AuthUsecase) LoginUser(ctx context.Context, input _genModel.LoginUserI
 		return nil, _customErr.NewGraphQLError(http.StatusBadRequest, "Failed to generate refresh token")
 	}
 
-	//get user session (Not allowed multiple login)
-	sessions, err := uc.userSessionRepo.GetUserSessionByUserId(ctx, userExist.ID)
-	if err != nil {
-		return nil, _customErr.NewGraphQLError(http.StatusBadRequest, "Failed to get user session")
+	//create new session
+	userSession := &_model.UserSession{
+		UserID:             userExist.ID,
+		ExpiredAccessDate:  expiredAccessTokenDate,
+		ExpiredRefreshDate: expiredRefreshTokenDate,
 	}
-
-	// not allowed multiple login
-	if sessions != nil {
-		return nil, _customErr.NewGraphQLError(http.StatusBadRequest, "User session is exist")
-	} else {
-		//create new session
-		userSession := &_model.UserSession{
-			UserID:             userExist.ID,
-			ExpiredAccessDate:  expiredAccessTokenDate,
-			ExpiredRefreshDate: expiredRefreshTokenDate,
-		}
-		_, err = uc.userSessionRepo.CreateUserSession(ctx, userSession)
-		if err != nil {
-			return nil, err
-		}
+	_, err = uc.userSessionRepo.CreateUserSession(ctx, userSession)
+	if err != nil {
+		return nil, err
 	}
 
 	// Set the password to empty (do not expose it)
