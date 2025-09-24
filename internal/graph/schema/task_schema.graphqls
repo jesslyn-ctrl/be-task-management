@@ -1,0 +1,67 @@
+type Task {
+    id: ID!
+    title: String!
+    description: String
+    status: String!  # e.g., "To Do", "In Progress", "Done"
+    assignedTo: ID @deprecated(reason: "Use assignedUser instead")  # User ID
+    assignedUser: User @goField(forceResolver: true)
+    teamId: ID! @deprecated(reason: "Use team instead")
+    team: Team! # TODO: add forceResolver
+    dueDate: DateTime!
+    createdAt: DateTime!
+    modifiedAt: DateTime!
+    createdBy: ID!
+    modifiedBy: ID
+}
+
+type DeletedTaskNotification {
+    taskId: ID!
+    deleted: Boolean!
+}
+
+input CreateTaskInput {
+    title: String!
+    description: String
+    status: String!
+    assignedTo: ID
+    teamId: ID!
+    dueDate: String!
+}
+
+input UpdateTaskInput {
+    id: ID!
+    title: String
+    description: String
+    status: String
+    assignedTo: ID
+    dueDate: String
+}
+
+input MoveTaskInput {
+    id: ID!
+    status: String!
+}
+
+input AssignTaskInput {
+    id: ID!
+    assignedTo: ID
+}
+
+extend type Query {
+    getTaskById(id: ID!): Task! @auth
+    tasksByTeam(teamId: ID!, status: String): [Task!]! @auth # can be filtered by status optionally
+}
+
+extend type Mutation {
+    createTask(input: CreateTaskInput!): Task! @auth
+    updateTaskById(input: UpdateTaskInput!): Task! @auth
+    deleteTaskById(id: ID!): Boolean! @auth
+    moveTaskById(input: MoveTaskInput!): Task! @auth
+    assignTask(input: AssignTaskInput!): Task! @auth
+}
+
+type Subscription {
+    taskCreated(teamId: ID!): Task
+    taskUpdated(teamId: ID!): Task
+    taskDeleted(teamId: ID!): DeletedTaskNotification
+}

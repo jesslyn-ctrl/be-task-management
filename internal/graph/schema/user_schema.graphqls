@@ -1,0 +1,47 @@
+type User {
+    id: ID!
+    name: String!
+    email: String!
+    password: String!
+    createdAt: DateTime!
+    modifiedAt: DateTime!
+    createdBy: ID!
+    modifiedBy: ID
+}
+
+#TODO:
+# 1.add constraint validation in field name
+# 2.update password min validation to 10 and max validation to 20
+input CreateUserInput {
+    name: String!
+    email: String! @binding(constraint: "required,email")
+    password: String! @binding(constraint: "required,min=8,max=64")
+}
+
+#TODO:
+# 1. input email field is mandatory
+input LoginUserInput {
+    email: String
+    password: String!
+}
+
+input RefreshTokenInput {
+    refreshToken: String!
+}
+
+type AuthResponse {
+    token: String!
+    refreshToken: String!
+    user: User!
+}
+
+
+#TODO: add getAllUser type Query with authentication, returning list of User
+
+
+extend type Mutation {
+    registerUser(input: CreateUserInput!): User!
+    loginUser(input: LoginUserInput!): AuthResponse!
+    refreshToken(input: RefreshTokenInput!): AuthResponse!
+    logoutUser(input: RefreshTokenInput!): Boolean!
+}

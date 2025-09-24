@@ -1,0 +1,14 @@
+app:
+  name: "Task Management API"
+  port: "8080"
+
+jwt:
+  access_token_ttl: "15m" # 15 mins
+  refresh_token_ttl: "168h" # 7 days
+
+database:
+  url: "postgresql://dev_app:SilakanMasu1%3C@172.18.181.22:5432/task_management?sslmode=require"
+  max_connections: 10
+  min_connections: 2
+  max_idle_time: "5m"
+  health_check_period: "1m"

@@ -1,0 +1,37 @@
+type Team {
+    id: ID!
+    name: String!
+    description: String
+    createdAt: DateTime!
+    modifiedAt: DateTime!
+    createdBy: ID!
+    modifiedBy: ID
+}
+
+type TeamSummary {
+    team: Team!
+    memberCount: Int
+}
+
+input CreateTeamInput {
+    name: String! @binding(constraint: "required,min=1,max=100")
+    description: String
+    assignee: [String!]
+}
+
+input UpdateTeamInput {
+    id: ID!
+    name: String! @binding(constraint: "required,min=1,max=100")
+    description: String
+    assignee: [String!]
+}
+
+extend type Query {
+    #TODO: add authorization
+    teamsByUser: [TeamSummary!]!
+}
+
+extend type Mutation {
+    createTeam(input: CreateTeamInput!): Team! @auth
+    updateTeam(input: UpdateTeamInput!): Team! @auth
+}

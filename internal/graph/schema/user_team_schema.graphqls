@@ -1,0 +1,23 @@
+type UserTeam {
+    user: User!
+    team: Team!
+}
+
+type AssignedUsers {
+    id: ID!
+    name: String!
+    email: String!
+}
+
+input AssignUserToTeamInput {
+    teamId: ID!
+    userId: [ID!]!
+}
+
+extend type Mutation {
+    assignUserToTeam(input: AssignUserToTeamInput!): Team! @auth
+}
+
+extend type Query {
+    getAssigneeByTeam(teamId: ID!): [AssignedUsers]! @auth
+}
